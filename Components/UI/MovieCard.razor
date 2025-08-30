@@ -1,12 +1,23 @@
 ﻿
 <div class="card h-100 movie-card">
-    <img src="img/poster.png" alt="Movie Poster" class="card img-top" />
+    <img src="@Movie?.PosterPath" alt="Movie Poster" class="card img-top" />
     <div class="card-body border border-top">
         <div class="card'title" fw-bold lh-1>
-            Movie Title
+            @Movie?.Title
         </div>
         <div class="card-text lh-1 fst-italic">
-            Release Date:  Jan 1, 2000
+            @{
+                var releaseDate = Movie?.ReleaseDate;
+                if (releaseDate != null)
+                {
+                    var date = DateTime.Parse(releaseDate);
+                    <text>Release Date: @date.ToString("MMM d, yyyy")</text>
+                }
+                else
+                {
+                    <text>Release Date: N/A</text>
+                }
+            }
         </div>
     </div>
     <div class="movie-card-footer card-footer d-flex justify-content-between">
@@ -16,5 +27,8 @@
 </div>
 
 @code {
+
+    [Parameter, EditorRequired]
+    public Movie? Movie { get; set; }
 
 }
