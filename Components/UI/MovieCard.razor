@@ -1,4 +1,5 @@
-﻿
+﻿@inject FavoritesService favoritesService
+
 <div class="card h-100 movie-card">
     <img src="@Movie?.PosterPath" alt="Movie Poster" class="card img-top" />
     <div class="card-body border border-top">
@@ -21,7 +22,9 @@
         </div>
     </div>
     <div class="movie-card-footer card-footer d-flex justify-content-between">
-        <button class="btn btn-light">Add Fav</button>
+        <button class="btn btn-light" onclick="@HandleFavoriteToggle">
+            @(IsFavorite ? "Remove Fav" : "Add Fave")
+        </button>
         <a href="movieDetail" class="btn btn-dark">More Info</a>
     </div>
 </div>
@@ -30,5 +33,41 @@
 
     [Parameter, EditorRequired]
     public Movie? Movie { get; set; }
+
+    private bool IsFavorite = false;
+
+    [Parameter]
+    public EventCallback OnFavoriteToggled { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if(Movie is not null)
+        {
+            IsFavorite = await favoritesService.IsFavorite(Movie.Id);
+        }
+    }
+
+    private async Task HandleFavoriteToggle()
+    {
+        if(Movie is null)
+        {
+            return;
+        }
+
+        if(IsFavorite)
+        {
+            IsFavorite = false;
+            await favoritesService.RemoveFromFavorites(Movie);
+        }else
+        {
+            IsFavorite = true;
+            await favoritesService.AddToFavorites(Movie);
+        }        
+
+        if(OnFavoriteToggled.HasDelegate)
+        {
+            await OnFavoriteToggled.InvokeAsync(null);
+        }
+    }
 
 }

@@ -1,10 +1,10 @@
 ﻿
 .movie-card {
-    box-shadow: 0 4px 8px rgba(0,0,0,.1);
     transition: transform 0.2s ease-in-out;
 }
 
 .movie-card:hover {
+    box-shadow: 0 4px 8px rgba(249,19,208);
     transform: scale(1.03);
     z-index: 99;
 }

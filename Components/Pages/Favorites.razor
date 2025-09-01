@@ -1,19 +1,81 @@
 ﻿@page "/favorites"
 
+@inject HttpClient http
+@inject IConfiguration config
+@inject TMDBService tmdbService
+@inject FavoritesService favoritesService
+
 <PageTitle>My Favorites</PageTitle>
 
-<div class="container-xxl py-3">
-    <h1>
-        <i class="bi bi-heart text-danger" />
-        Favorites
-    </h1>
-    <p class="lead italic">
-        Movies that I love and have added to My Favorites.
-    </p>
+<div class="dark-bg">
+    <div class="container-xxl py-3">
+        <h1>
+            <i class="bi bi-heart text-danger" />
+            Popular
+        </h1>
+        <p class="lead italic">
+            Movies that I love and have added to My Favorites.
+        </p>
+        <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
+            @if (favoriteMovies == null && isLoading)
+            {
+                <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            }
+            else if (favoriteMovies != null && favoriteMovies.Count == 0)
+            {
+                <div class="alert alert-info" role="alert">
+                    No movies are currently playing in theaters.
+                </div>
+            }
+            else if (favoriteMovies == null)
+            {
+                <div class="alert alert-danger" role="alert">
+                    Failed to load now playing movies. Please try again later.
+                </div>
+            }
+            else
+            {
+                @foreach (var movie in favoriteMovies)
+                {
+                    <div class="col">
+                        <MovieCard Movie="movie" OnFavoriteToggled="OnParametersSetAsync" />
+                    </div>
+                }
+            }
+        </div>
+    </div>
+
 </div>
 
 
 @code {
 
+    private List<Movie>? favoriteMovies;
+    private bool isLoading = true;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            isLoading = true;
+            // Load the Facvorites from Local Storage Service
+            favoriteMovies = await favoritesService.GetFavoritesAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error fetching popular movies: {ex.Message}");
+            favoriteMovies = null;
+        }
+        finally
+        {
+            isLoading = false;
+        }
+
+
+    }
 }
 
