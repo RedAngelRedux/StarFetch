@@ -29,7 +29,7 @@
         <button class="btn btn-light" onclick="@HandleFavoriteToggle">
             @(IsFavorite ? "Remove Fav" : "Add Fave")
         </button>
-        <a href="movieDetail" class="btn btn-dark">More Info</a>
+        <a href="movie/@Movie?.Id" class="btn btn-dark">More Info</a>
     </div>
 </div>
 

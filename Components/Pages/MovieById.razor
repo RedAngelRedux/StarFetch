@@ -1,0 +1,19 @@
+﻿@page "/movie/{movieId:int}"
+
+@inject TMDBService TMDBService
+
+<PageTitle>Movie Details</PageTitle>
+
+<h1 style="color: var(--cf-theme-light)">
+    <i class="bi bi-house-door-fill-nav-menu"></i>
+    Movie Details for ID: @MovieId
+</h1>
+
+@code {
+
+    [Parameter]
+    public int MovieId { get; set; }
+
+    private MovieDetails? movie;
+
+}
