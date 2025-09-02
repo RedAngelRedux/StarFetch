@@ -42,37 +42,31 @@
                     </NavLink>
                 </li>
             </ul>
+            <form class="d-flex" role="search">
+                <InputText class="form-control form-control-sm me-2" type="search" placeholder="Search Movies..." aria-label="Search" name="query" @bind-Value="Query" />
+                <button class="btn btn-sm btn-light" type="button" onclick="@HandleSearch">Search</button>
+            </form>
         </div>
     </div>
 </nav>
 
 @code {
 
-    private IDisposable? locationChangedHandler;
+    [SupplyParameterFromQuery]
+    private string Query { get; set; } = string.Empty;
 
-    protected override void OnInitialized()
+    private void HandleSearch()
     {
-        // Note:  
-        // RegisteringLocationChangingHandler (.NET 8+) is used to collapse the menu when navigating to a new page.
-        // This is useful for mobile devices where the menu should close after a selection.
-        // .NET 7 and earlier would use Navigation.LocationChanged event.
-        locationChangedHandler = Navigation.RegisterLocationChangingHandler(OnLocationChanging);
+        if (!string.IsNullOrWhiteSpace(Query))
+        {
+            var encodedQuery = Uri.EscapeDataString(Query);
+            Navigation.NavigateTo($"/search?query={encodedQuery}");
+            Query = string.Empty;
+        }
+        else
+        {
+            Navigation.NavigateTo("/search?blank=true");
+        }
     }
 
-    public void Dispose()
-    {
-        locationChangedHandler?.Dispose();
-    }
-
-    // Alternativly, I could have set onclick="CollapseMenu" on the button element.
-    // This method is more comprehensive and allows for more control.
-    private async ValueTask OnLocationChanging(LocationChangingContext context)
-    {
-        await CollapseMenu();
-    }
-
-    private async Task CollapseMenu()
-    {
-        await JS.InvokeVoidAsync("collapseNavbar");
-    }
 }

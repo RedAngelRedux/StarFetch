@@ -6,50 +6,46 @@
 
 <PageTitle>Popular</PageTitle>
 
-<div class="dark-bg">
-    <div class="container-xxl py-3">
-        <h1>
-            <i class="bi bi-stars" style="color: var(--cf-theme-300)" />
-            Popular
-        </h1>
-        <p class="lead italic">
-            Most popular movies currently in theaters.
-        </p>
-        <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
-            @if (popularMovies == null && isLoading)
+<div class="container-xxl py-3">
+    <h1 style="color: var(--cf-light-color)">
+        <i class="bi bi-stars" style="color: var(--cf-theme-300)" />
+        Popular
+    </h1>
+    <p class="lead italic">
+        Most popular movies currently in theaters.
+    </p>
+    <div class="row g-3 row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4">
+        @if (popularMovies == null && isLoading)
+        {
+            <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        }
+        else if (popularMovies != null && popularMovies.Results.Count == 0)
+        {
+            <div class="alert alert-info" role="alert">
+                No movies are currently playing in theaters.
+            </div>
+        }
+        else if (popularMovies == null)
+        {
+            <div class="alert alert-danger" role="alert">
+                Failed to load now playing movies. Please try again later.
+            </div>
+        }
+        else
+        {
+            foreach (var movie in popularMovies.Results)
             {
-                <div class="d-flex justify-content-center align-items-center" style="height: 200px;">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">Loading...</span>
-                    </div>
+                <div class="col">
+                    <MovieCard Movie="movie" />
                 </div>
             }
-            else if (popularMovies != null && popularMovies.Results.Count == 0)
-            {
-                <div class="alert alert-info" role="alert">
-                    No movies are currently playing in theaters.
-                </div>
-            }
-            else if (popularMovies == null)
-            {
-                <div class="alert alert-danger" role="alert">
-                    Failed to load now playing movies. Please try again later.
-                </div>
-            }
-            else
-            {
-                @foreach (var movie in popularMovies.Results)
-                {
-                    <div class="col">
-                        <MovieCard Movie="movie" />
-                    </div>
-                }
-            }
-        </div>
+        }
     </div>
-
 </div>
-
 
 @code {
 

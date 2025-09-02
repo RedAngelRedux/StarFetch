@@ -14,3 +14,9 @@
 .dropdown:has(.nav-link.active) .dropdown-toggle {
     color: var(--bs-navbar-active-color);
 }
+
+::deep form form-control {
+    background-color: var(--cf-theme-800);
+    border: 1px solid var(--cf-theme-700);
+    color: var(--cf-theme-200);
+}

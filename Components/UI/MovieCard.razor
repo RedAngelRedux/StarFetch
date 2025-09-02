@@ -8,16 +8,20 @@
         </div>
         <div class="card-text lh-1 fst-italic">
             @{
-                var releaseDate = Movie?.ReleaseDate;
-                if (releaseDate != null)
-                {
-                    var date = DateTime.Parse(releaseDate);
-                    <text>Release Date: @date.ToString("MMM d, yyyy")</text>
-                }
-                else
-                {
-                    <text>Release Date: N/A</text>
-                }
+                //var releaseDate = Movie?.ReleaseDate;
+                DateTime releaseDate;
+                string releaseDateeString = DateTime.TryParse(Movie?.ReleaseDate, out releaseDate) ? releaseDate.ToString("MMM d, yyyy") : "N / A";
+                <text>Release Date: @releaseDateeString</text>
+
+                // if (releaseDate != null)
+                // {
+                //     var date = DateTime.Parse(releaseDate);                    
+                //     <text>Release Date: @date.ToString("MMM d, yyyy")</text>
+                // }
+                // else
+                // {
+                //     <text>Release Date: N/A</text>
+                // }
             }
         </div>
     </div>

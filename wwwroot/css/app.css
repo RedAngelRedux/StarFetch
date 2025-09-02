@@ -16,7 +16,14 @@ html, body {
     font-size: var(--cf-font-size);
     height: 100%;
     min-height: 100vh;
+    background-color: var(--cf-theme-850);
+    color: var(--cf-light-color);
 }
+
+/*.dark-bg {
+    background-color: var(--cf-theme-850);
+    color: var(--cf-light-color);
+}*/
 
 .title {
     font-family: var(--cf-title-font);

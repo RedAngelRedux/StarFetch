@@ -58,13 +58,24 @@ public class TMDBService
 
     public async Task<MovieListResponse> GetNowPlayingMoviesAsync()
     {
-        string url = $"{_http.BaseAddress}movie/now_playing?region=US&language=en-US";
+        string url = $"{_http.BaseAddress}movie/now_playing?&region=US&language=en-US&include_adult=false";
         return await FetchMoviesAsync(url);
     }
 
     public async Task<MovieListResponse> GetPopularMoviesAsync()
     {
-        string url = $"{_http.BaseAddress}movie/popular?region=US&language=en-US";
+        string url = $"{_http.BaseAddress}movie/popular?&region=US&language=en-US&include_adult=false";
+        return await FetchMoviesAsync(url);
+    }
+
+    /// <summary>
+    /// Search for movies by title.
+    /// </summary>
+    /// <param name="query">User supplied by the user</param>
+    /// <returns></returns>
+    public async Task<MovieListResponse> SearchMoviesAsync(string query)
+    {
+        string url = $"{_http.BaseAddress}search/movie?query={Uri.EscapeDataString(query)}&region=US&language=en-US&include_adult=false";
         return await FetchMoviesAsync(url);
     }
 }
