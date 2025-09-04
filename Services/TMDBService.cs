@@ -115,5 +115,23 @@ public class TMDBService
 
         return movie;
     }
+
+    public async Task<Video>? GetMovieTrailerAsync(int movieId)
+    {
+        string url = $"{_http.BaseAddress}movie/{movieId}/videos?language=en-US";
+
+        var response = await _http.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        var videoResponse = await response.Content.ReadFromJsonAsync<MovieVideosResponse>(_jsonOptions)
+            ?? throw new HttpIOException(HttpRequestError.InvalidResponse, "Failed to fetch movie videos.");
+
+        // Prefer trailers from YouTube
+        Video? trailer = videoResponse.Results
+            .FirstOrDefault(v => v.Type!.Equals("Trailer", StringComparison.OrdinalIgnoreCase) && v.Site!.Equals("YouTube", StringComparison.OrdinalIgnoreCase))
+            //?? videoResponse.Results.FirstOrDefault(v => v.Type.Equals("Trailer", StringComparison.OrdinalIgnoreCase));            
+
+        return trailer!;
+    }
 }
 
