@@ -25,7 +25,7 @@ public class MovieDetails
     public string? Tagline { get; set; }
     public string? Title { get; set; }
     public bool Video { get; set; }
-    public int VoteAverage { get; set; }
+    public decimal VoteAverage { get; set; }
     public int VoteCount { get; set; }
 }
 

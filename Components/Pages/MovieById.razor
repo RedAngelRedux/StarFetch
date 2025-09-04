@@ -2,18 +2,99 @@
 
 @inject TMDBService TMDBService
 
-<PageTitle>Movie Details</PageTitle>
+@if(movie is not null)
+{
+    <PageTitle>@movie.Title</PageTitle>
+}
 
-<h1 style="color: var(--cf-theme-light)">
-    <i class="bi bi-house-door-fill-nav-menu"></i>
-    Movie Details for ID: @MovieId
-</h1>
+@if(movie is null)
+{
+    <div class="container-fluid p-0 h-100">
+        <div> class="py-5 justify-content-center align-items-center">
+            @if (isLoading)
+            {
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            }
+            else
+            {
+                <h2 style="color: var(--cf-theme-light)">
+                    The requested movie could not be found.
+                </h2>
+            }
+        </div>
+    </div>
+}
+else
+{
+    <div class="container-fluid p-0 h-100 d-flex align-items-center justify-content-left" id="movie-details" style="--background: url(@movie.BackdropPath)">
+        <div id="movie-wrapper" class="container-xxl py-3">
+                <div>
+                    <div class="row">
+                        <div class="col-12 col-md-4 col-xl-3 text-center text-md-start mb-3">
+                            <img class="img-fluid" id="movie-wrapper" alt="movie poster" src="@movie.PosterPath" />
+                        </div>
+                        <div class="col-12 col-md-8 col-xl-9">
+                            <h3 class="display-6 fw-bold mb-0">
+                            @movie.Title
+                            </h3>
+                            <div class="lead mb-3">
+                                @movie.Tagline
+                            </div>
+                            <div class="hstack gap-2">
+                                @{
+                                    bool dateParsed = DateTime.TryParse(movie.ReleaseDate, out DateTime releaseDate);
+                                    if (dateParsed)
+                                    {
+                                        <span><i class="bi bi-calendar3"></i> @releaseDate.ToString("MMM dd, yyyy") | </span>
+                                    }
+                                }
+                                <span><i class="bi bi-clock"></i> @(movie.Runtime / 60)h @(movie.Runtime % 60)m</span>
+                            </div>
+                            <div class="hstack gap-2 my-2">
+                                @foreach(var genre in movie.Genres)
+                                {
+                                    <span class="badge rounded-pill text-bg-secondary">@genre.Name</span>
+                                }    
+                            </div>
+                            <div class="lead fw-bold pt-3 mt-3">Overview</div>
+                            <p>@movie.Overview</p>
+                            <div>
+                                <span id="movie-rating">
+                                    User Score: @((movie.VoteAverage * 10).ToString("F2"))%
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+}
 
 @code {
 
     [Parameter]
     public int MovieId { get; set; }
+    bool isLoading = true;
 
     private MovieDetails? movie;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        try
+        {
+            isLoading = true;
+            movie = await TMDBService.GetMovieDetailsAsync(MovieId);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine($"Error fetching movie details: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
 
 }

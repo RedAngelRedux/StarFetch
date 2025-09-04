@@ -15,10 +15,12 @@ html, body {
     font-family: var(--cf-body-font);
     font-size: var(--cf-font-size);
     height: 100%;
+    margin: 0;
     min-height: 100vh;
     background-color: var(--cf-theme-850);
     color: var(--cf-light-color);
 }
+
 
 /*.dark-bg {
     background-color: var(--cf-theme-850);
@@ -130,3 +132,74 @@ code {
 }
 
 /* #endregion Blazor default CSS*/
+
+/* #region theme */
+a {
+    color: var(--cf-theme-500);
+}
+
+    a:hover {
+        color: var(--cf-theme-300);
+    }
+
+.btn-primary {
+    --bs-btn-bg: var(--cf-theme-600);
+    --bs-btn-border-color: var(--cf-theme-600);
+    --bs-btn-hover-bg: var(--cf-theme-700);
+    --bs-btn-hover-border-color: var(--cf-theme-700);
+    --bs-btn-active-bg: var(--cf-theme-800);
+    --bs-btn-active-border-color: var(--cf-theme-800);
+    --bs-btn-disabled-bg: var(--cf-theme-600);
+    --bs-btn-disabled-border-color: var(--cf-theme-600);
+}
+
+.btn-dark {
+    --bs-btn-bg: var(--cf-theme-850);
+    --bs-btn-border-color: var(--cf-theme-850);
+    --bs-btn-hover-bg: var(--cf-theme-800);
+    --bs-btn-hover-border-color: var(--cf-theme-800);
+    --bs-btn-active-bg: var(--cf-theme-700);
+    --bs-btn-active-border-color: var(--cf-theme-700);
+    --bs-btn-disabled-bg: var(--cf-theme-850);
+    --bs-btn-disabled-border-color: var(--cf-theme-850);
+}
+
+.btn-light {
+    --bs-btn-bg: var(--cf-theme-100);
+    --bs-btn-border-color: var(--cf-theme-100);
+    --bs-btn-hover-bg: var(--cf-theme-150);
+    --bs-btn-hover-border-color: var(--cf-theme-150);
+    --bs-btn-active-bg: var(--cf-theme-200);
+    --bs-btn-active-border-color: var(--cf-theme-200);
+    --bs-btn-disabled-bg: var(--cf-theme-100);
+    --bs-btn-disabled-border-color: var(--cf-theme-100);
+}
+
+h1, h2, h3, h4, h5, h6 {
+    color: var(--cf-theme-core);
+    font-family: var(--cf-theme-title-font);
+}
+
+.h1, .h2, .h3, .h4, .h5, .h6 {
+    color: var(--cf-theme-core);
+    font-family: var(--cf-theme-title-font);
+}
+
+table.table-custom {
+    --bs-table-bg: var(--cf-theme-100);
+    --bs-table-striped-bg: var(--cf-theme-150);
+    --bs-table-striped-color: var(--cf-theme-dark);
+    --bs-table-active-bg: var(--cf-theme-200);
+    --bs-table-active-color: var(--cf-theme-dark);
+    --bs-table-hover-bg: var(--cf-theme-150);
+    --bs-table-hover-color: var(--cf-theme-dark);
+    color: var(--cf-theme-dark);
+    border-color: var(--cf-theme-600);
+}
+
+    table.table-custom th {
+        color: var(--cf-theme-850);
+        border-bottom: 2px solid var(--cf-theme-700);
+    }
+
+/* #endregion theme */
