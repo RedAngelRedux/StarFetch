@@ -30,3 +30,15 @@
     width: 100%;
     height: auto;
 }
+
+.modal-background {
+    background-color: var(--cf-theme-900);
+    color: var(--cf-theme-100);
+}
+
+.modal-header button {
+    color: var(--bs-warning);
+    background-color: transparent;
+    border: none;
+    font-size: 2rem;
+}

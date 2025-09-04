@@ -128,7 +128,7 @@ public class TMDBService
 
         // Prefer trailers from YouTube
         Video? trailer = videoResponse.Results
-            .FirstOrDefault(v => v.Type!.Equals("Trailer", StringComparison.OrdinalIgnoreCase) && v.Site!.Equals("YouTube", StringComparison.OrdinalIgnoreCase))
+            .FirstOrDefault(v => v.Type!.Equals("Trailer", StringComparison.OrdinalIgnoreCase) && v.Site!.Equals("YouTube", StringComparison.OrdinalIgnoreCase));
             //?? videoResponse.Results.FirstOrDefault(v => v.Type.Equals("Trailer", StringComparison.OrdinalIgnoreCase));            
 
         return trailer!;
