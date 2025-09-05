@@ -42,9 +42,9 @@
                     </NavLink>
                 </li>
             </ul>
-            <form class="d-flex" role="search">
+            <form class="d-flex" role="search" @onsubmit="HandleSearch">
                 <InputText class="form-control form-control-sm me-2" type="search" placeholder="Search Movies..." aria-label="Search" name="query" @bind-Value="Query" />
-                <button class="btn btn-sm btn-light" type="button" onclick="@HandleSearch">Search</button>
+                <button class="btn btn-sm btn-light" type="submit" disabled="@string.IsNullOrWhiteSpace(Query)">Search</button>
             </form>
         </div>
     </div>
