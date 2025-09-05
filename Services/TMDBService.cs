@@ -133,5 +133,28 @@ public class TMDBService
 
         return trailer!;
     }
+
+    public async Task<MovieCreditsResponse?> GetMovieCreditsAsync(int movieId)
+    {
+        string url = $"{_http.BaseAddress}movie/{movieId}/credits?language=en-US";
+
+        var response = await _http.GetAsync(url);
+        response.EnsureSuccessStatusCode();
+
+        MovieCreditsResponse credits = await response.Content.ReadFromJsonAsync<MovieCreditsResponse>(_jsonOptions)
+            ?? throw new HttpIOException(HttpRequestError.InvalidResponse, "Failed to fetch movie credits.");
+
+        foreach(var cast in  credits.Cast)
+        {
+            cast.ProfilePath = string.IsNullOrEmpty(cast.ProfilePath) ? "/img/profile.jpg" : $"{_basePosterUrl}{cast.ProfilePath}";
+        }
+
+        foreach (var crew in credits.Crew)
+        {
+            crew.ProfilePath = string.IsNullOrEmpty(crew.ProfilePath) ? "/img/profile.jpg" : $"{_basePosterUrl}{crew.ProfilePath}";
+        }
+
+        return credits;
+    }
 }
 

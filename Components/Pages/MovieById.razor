@@ -81,7 +81,7 @@ else
             <div class="card" style="background-color: rgba(0,0,0,0);">
                 <div class="card-body">
                     <h3 class="card-title" style="color: var(--cf-theme-300)">Top Billed Cast</h3>
-                    <ActorSwiper />
+                    <ActorSwiper Actors="actors" />
                 </div>
             </div>
         </div>
@@ -123,6 +123,7 @@ else
     private MovieDetails? movie;
     private Video? movieTrailer;
     private string? trailerUrl;
+    private List<Cast> actors = [];
 
     protected override async Task OnParametersSetAsync()
     {
@@ -134,6 +135,8 @@ else
             trailerUrl = (movieTrailer is not null) 
                 ? $"https://www.youtube-nocookie.com/embed/{movieTrailer.Key}?autoplay=1&modestbranding=1&rel=0" 
                 : string.Empty;
+            var credits = await TMDBService.GetMovieCreditsAsync(MovieId);
+            actors = credits?.Cast ?? [];
         }
         catch(Exception ex)
         {
