@@ -1,22 +1,20 @@
-﻿/*#movie-details {
-    color: var(--cf-theme-light);
-    background: linear-gradient(rgba(2,2,2,0.5), rgba(0,0,0,0.9));
-    background: linear-gradient(to right,rgba(181,53,132,0.9)0%,rgba(161,42,247,0.9)20%, rgba(25,25,112,0.9) 100%);
-    background-image: var(--background);
-    background-position: center center;
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-blend-mode: overlay;
-}*/
-#movie-details {
-    /*background: linear-gradient(to right,rgba(181,53,132,.95)0%,rgba(161,42,247,.8)20%, rgba(25,25,112,.95) 100%),url("img//NowPlayingBG.jpg");*/
-    /*background: linear-gradient(to right,rgba(181,53,132,.95)0%,rgba(161,42,247,.8)20%, rgba(25,25,112,.95) 100%),var(--background);*/
+﻿#movie-details {
     background: linear-gradient(rgba(2,2,2,0.5), rgba(0,0,0,0.9)),var(--background);
     background-position: center center;
     background-size: cover;
     background-repeat: no-repeat;
-    color: var(--cf-light-color);
+    color: white;
+    fw-bolder;
 }
+
+    #movie-details h1,
+    #movie-details h2,
+    #movie-details h3,
+    #movie-details h4,
+    #movie-details h5 {
+        color: var(--cf-theme-300);
+    }
+
 
 #movie-wrapper {
     backdrop-filter: blur(2px);
