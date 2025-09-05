@@ -1,0 +1,20 @@
+﻿
+@inject IJSRuntime JS
+
+<!-- TrailerFallback.razor -->
+<div class="trailer-fallback position-relative text-center">
+    @* <img src="@PosterUrl" alt="Trailer thumbnail" class="img-fluid rounded shadow" /> *@
+    <button class="btn btn-warning play-overlay" @onclick="OpenTrailer">
+        <i class="bi bi-play-circle-fill fs-1"></i>
+    </button>
+</div>
+
+@code {
+    [Parameter] public string? PosterUrl { get; set; }
+    [Parameter] public string? TrailerUrl { get; set; }
+
+    private void OpenTrailer()
+    {
+        JS.InvokeVoidAsync("window.open", TrailerUrl, "_blank");
+    }    
+}

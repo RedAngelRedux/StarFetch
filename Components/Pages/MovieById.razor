@@ -68,6 +68,7 @@ else
                         </div>
                         @if (!string.IsNullOrEmpty(movieTrailer?.Key))
                         {
+                            @* <TrailerFallback PosterUrl="@movie.PosterPath" TrailerUrl="@trailerUrl" /> *@
                             <div id="btn-trailer" class="mt-3">
                                 <button class="btn btn-outline-warning" data-bs-toggle="modal" data-bs-target="#movie-modal">
                                     <i class="bi bi-play"></i> Play Trailer
@@ -115,6 +116,7 @@ else
 
     private MovieDetails? movie;
     private Video? movieTrailer;
+    private string? trailerUrl;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -123,6 +125,9 @@ else
             isLoading = true;
             movie = await TMDBService.GetMovieDetailsAsync(MovieId);
             movieTrailer = await TMDBService.GetMovieTrailerAsync(MovieId)!;
+            trailerUrl = (movieTrailer is not null) 
+                ? $"https://www.youtube-nocookie.com/embed/{movieTrailer.Key}?autoplay=1&modestbranding=1&rel=0" 
+                : string.Empty;
         }
         catch(Exception ex)
         {
@@ -138,14 +143,20 @@ else
     {
         await using var jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "/Components/Pages/MovieById.razor.js");
 
-        if (movieTrailer is not null)
-        {
-            string trailerUrl = $"https://www.youtube-nocookie.com/embed/{movieTrailer.Key}?autoplay=1&modestbranding=1&rel=0";            
-            await jsModule.InvokeVoidAsync("initVideoPlayer", trailerUrl);
-        }
-        else
-        {
-            await jsModule.InvokeVoidAsync("initVideoPlayer", string.Empty);
-        }
+        trailerUrl = (movieTrailer is not null)
+            ? $"https://www.youtube-nocookie.com/embed/{movieTrailer.Key}?autoplay=1&modestbranding=1&rel=0"
+            : string.Empty;
+
+        await jsModule.InvokeVoidAsync("initVideoPlayer", trailerUrl);
+
+        // if (movieTrailer is not null)
+        // {
+        //     trailerUrl = $"https://www.youtube-nocookie.com/embed/{movieTrailer.Key}?autoplay=1&modestbranding=1&rel=0";            
+        //     await jsModule.InvokeVoidAsync("initVideoPlayer", trailerUrl);
+        // }
+        // else
+        // {
+        //     await jsModule.InvokeVoidAsync("initVideoPlayer", string.Empty);
+        // }
     }
 }
