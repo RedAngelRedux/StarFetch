@@ -1,6 +1,7 @@
 ﻿@page "/movie/{movieId:int}"
 
 @inject TMDBService TMDBService
+@inject IJSRuntime JS
 
 @if(movie is not null)
 {
@@ -10,7 +11,7 @@
 @if(movie is null)
 {
     <div class="container-fluid p-0 h-100">
-        <div> class="py-5 justify-content-center align-items-center">
+        <div class="py-5 justify-content-center align-items-center">
             @if (isLoading)
             {
                 <div class="spinner-border text-primary" role="status">
@@ -84,15 +85,17 @@ else
     <div class="modal-dialog modal-dialog-centered modal-xl">
         <div class="modal-content modal-background">
             <div class="modal-header">
-                <h5 class="modal-title" id="modal-title">Movie Title</h5>
-                <button type="button" data-bs-dismiss="modal" aria-label="Close">
+                <h5 class="modal-title" id="modal-title">@((movie is not null) ? movie!.Title ?? "Movie Title" : "Movie Title")</h5>
+                <button type="button" class="ms-auto" data-bs-dismiss="modal" aria-label="Close">
                     <i class="bi bi-x"></i>
                 </button>
             </div>
             <div class="modal-body">
-                <div class="ratio ratio=16x9">
-                    <iframe id="modal-trailer" src="" allowfullscreen>
-
+                <div class="ratio ratio-16x9">
+                    <iframe id="modal-trailer" 
+                            src="" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowfullscreen>
                     </iframe>
                 </div>
             </div>
@@ -131,4 +134,18 @@ else
         }
     }
 
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await using var jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "/Components/Pages/MovieById.razor.js");
+
+        if (movieTrailer is not null)
+        {
+            string trailerUrl = $"https://www.youtube-nocookie.com/embed/{movieTrailer.Key}?autoplay=1&modestbranding=1&rel=0";            
+            await jsModule.InvokeVoidAsync("initVideoPlayer", trailerUrl);
+        }
+        else
+        {
+            await jsModule.InvokeVoidAsync("initVideoPlayer", string.Empty);
+        }
+    }
 }
