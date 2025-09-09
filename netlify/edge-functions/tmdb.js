@@ -7,14 +7,33 @@ export default async (request, context) => {
     if (!tmdbUrl.endswith("/")) tmdbUrl += "/";
 
     const url = new URL(request.url);
-    const tmdbPath = url.pathname.replace("/TMDB/", ""); // /tmdb/movies/popular -> movies/popular   
+    const tmdbPath = url.pathname.replace("/TMDB/", ""); // /tmdb/movies/popular -> movies/popular
 
-    return await fetch(tmdbUrl + tmdbPath + url.search, {
+    let targetUrl = tmdbUrl + tmdbPath + url.search
+
+    // For Debugging in Production
+    console.log("Incoming request:", request.url);
+    console.log("tmdbUrl:", tmdbUrl);
+    console.log("tmdbPath:", tmdbPath);
+    console.log("Query string:", url.search);
+
+    const response = await fetch(targetUrl, {
         headers: {
             Authorization: `Bearer ${key}`
         },
         method: request.method
     });
+
+    console.log("Response status:", response.status);
+
+    return response;
+
+//    return await fetch(targetUrl, {
+//        headers: {
+//            Authorization: `Bearer ${key}`
+//        },
+//        method: request.method
+//    });
 }
 
 export const config = {

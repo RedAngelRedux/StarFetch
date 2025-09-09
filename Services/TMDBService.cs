@@ -33,6 +33,8 @@ public class TMDBService
         else
         {
             _http.BaseAddress = new Uri(_http.BaseAddress + "/TMDB/");
+            _http.DefaultRequestHeaders.Accept.Clear();
+            _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
     }
 
