@@ -22,17 +22,18 @@ public class TMDBService
         _http = httpClient;
         _config = configuration;
 
-        string? apiKey = _config["TmdbAccessKey"];
-        if (string.IsNullOrEmpty(apiKey))
-        {
-            throw new ArgumentNullException("TMDB API key is not configured.");
-        }
-        else
+        string? apiKey = _config["TmdbAccessKey"];  // This will only work on local dev
+
+        if (!string.IsNullOrEmpty(apiKey))
         {
             _http.BaseAddress = new Uri("https://api.themoviedb.org/3/");
             _http.DefaultRequestHeaders.Accept.Clear();
             _http.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             _http.DefaultRequestHeaders.Add("Authorization", $"Bearer {apiKey}");
+        }
+        else
+        {
+            _http.BaseAddress = new Uri(_http.BaseAddress + "tmdb/");
         }
     }
 
