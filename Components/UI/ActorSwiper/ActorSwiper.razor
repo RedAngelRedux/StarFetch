@@ -1,7 +1,7 @@
 ﻿
 @inject IJSRuntime JS
 
-<div class="swiper-container">
+<div class="swiper-container" @ref="container">
     <button class="nav-btn-prev">
         <i class="bi bi-chevron-left"></i>
     </button>
@@ -19,5 +19,19 @@
 @code {
     [Parameter, EditorRequired]
     public List<Cast> Actors { get; set; } = [];
+
+    ElementReference? container;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if(firstRender)
+        {
+            // The version query parameter is extraneious and was added simply to "trick" the browser into reloading static JS pages.
+            // Blazor WebAssembly apps are notorious for aggressively caching static assets, including  files, especially when served locally.
+            // This is something I learned the hard way.  This trick seems to prevent that issue from happening.
+            await using var jsModule = await JS.InvokeAsync<IJSObjectReference>("import", "/Components/UI/ActorSwiper/ActorSwiper.razor.js?v=2");
+            await jsModule.InvokeVoidAsync("init", container);
+        }
+    }
 
 }
