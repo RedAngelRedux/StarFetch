@@ -9,13 +9,16 @@ export default async (request, context) => {
     const url = new URL(request.url);
     const tmdbPath = url.pathname.replace("/TMDB/", ""); // /tmdb/movies/popular -> movies/popular
 
-    let targetUrl = tmdbUrl + tmdbPath + url.search
 
     // For Debugging in Production
     console.log("Incoming request:", request.url);
     console.log("tmdbUrl:", tmdbUrl);
     console.log("tmdbPath:", tmdbPath);
     console.log("Query string:", url.search);
+
+    let targetUrl = tmdbUrl + tmdbPath + url.search
+
+    console.log("Netlify API Call: ", targetUrl);
 
     const response = await fetch(targetUrl, {
         headers: {
