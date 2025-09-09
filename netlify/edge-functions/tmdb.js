@@ -1,23 +1,24 @@
 ﻿ // The "Video"" way
 export default async (request, context) => {
 
-    const key = Netlify.env.get('API_KEY');
-    let tmdbUrl = Netlify.env.get('API_URL');
+    const key = Netlify.env.get("API_KEY");
+    let tmdbUrl = Netlify.env.get("API_URL");
 
-    if (!tmdbUrl.endswith('/')) tmdbUrl += '/';
+    if (!tmdbUrl.endswith("/")) tmdbUrl += "/";
 
     const url = new URL(request.url);
-    const tmdbPath = url.pathname.replace('/TMDB/', ''); // /tmdb/movies/popular -> movies/popular
+    const tmdbPath = url.pathname.replace("/TMDB/", ""); // /tmdb/movies/popular -> movies/popular
 
     return await fetch(tmdbUrl + tmdbPath + url.search, {
         headers: {
-            'Authorization':  `Bearer ${key}`
-        }
+            Authorization: `Bearer ${API_KEY}`
+        },
+        method: request.method
     });
 }
 
 export const config = {
-    path: '/TMDB/*'
+    path:  "/TMDB/*"
 }
 
 //// The "written" way (Did not Build on Netlify As-is)
