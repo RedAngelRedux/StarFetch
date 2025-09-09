@@ -7,7 +7,7 @@ export default async (request, context) => {
     if (!tmdbUrl.endswith('/')) tmdbUrl += '/';
 
     const url = new URL(request.url);
-    const tmdbPath = url.pathname.replace('/tmdb/', ''); // /tmdb/movies/popular -> movies/popular
+    const tmdbPath = url.pathname.replace('/TMDB/', ''); // /tmdb/movies/popular -> movies/popular
 
     return await fetch(tmdbUrl + tmdbPath + url.search, {
         headers: {
@@ -17,7 +17,7 @@ export default async (request, context) => {
 }
 
 export const config = {
-    path: '/tmdb/*'
+    path: '/TMDB/*'
 }
 
 //// The "written" way (Did not Build on Netlify As-is)

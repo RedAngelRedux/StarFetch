@@ -1,7 +1,6 @@
 ﻿using StarFetch.Models;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 using System.Text.Json;
 
 namespace StarFetch.Services;
@@ -33,7 +32,7 @@ public class TMDBService
         }
         else
         {
-            _http.BaseAddress = new Uri(_http.BaseAddress + "tmdb/");
+            _http.BaseAddress = new Uri(_http.BaseAddress + "/TMDB/");
         }
     }
 
