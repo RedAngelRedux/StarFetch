@@ -23,11 +23,11 @@ export default async (request, context) => {
     const response = await fetch(targetUrl, {
         headers: {
             Authorization: `Bearer ${key}`
-        },
-        method: request.method
+        }
     });
 
     console.log("Response status:", response.status);
+    console.log("response:", response);
 
     return response;
 
