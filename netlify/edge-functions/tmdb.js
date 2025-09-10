@@ -19,11 +19,10 @@ export default async (request, context) => {
     let targetUrl = tmdbUrl + tmdbPath + url.search
 
     console.log("Netlify API Call: ", targetUrl);
+    consold.log("Auth Header: ", authHeaders(key))
 
     const response = await fetch(targetUrl, {
-        headers: {
-            Authorization: `Bearer ${key}`
-        }
+        headers: authHeaders(key)
     });
 
     console.log("Response status:", response.status);
@@ -41,6 +40,12 @@ export default async (request, context) => {
 
 export const config = {
     path:  "/TMDB/*"
+}
+
+function authHeaders(token) {
+    return {
+        Authorization: `Bearer ${token}`
+    };
 }
 
 //// The "written" way (Did not Build on Netlify As-is)

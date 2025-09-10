@@ -40,7 +40,7 @@ public class TMDBService
 
     private async Task<MovieListResponse> FetchMoviesAsync(string url)
     {
-
+        Console.WriteLine(_http.DefaultRequestHeaders);
         var response = await _http.GetAsync(url);
         response.EnsureSuccessStatusCode();
         var movieList = await response.Content.ReadFromJsonAsync<MovieListResponse>(_jsonOptions);
