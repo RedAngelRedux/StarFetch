@@ -19,7 +19,7 @@ export default async (request, context) => {
     let targetUrl = tmdbUrl + tmdbPath + url.search
 
     console.log("Netlify API Call: ", targetUrl);
-    consold.log("Auth Header: ", authHeaders(key))
+    console.log("Auth Header: ", authHeaders(key))
 
     const response = await fetch(targetUrl, {
         headers: authHeaders(key)
