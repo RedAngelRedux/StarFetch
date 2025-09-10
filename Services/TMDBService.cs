@@ -42,7 +42,6 @@ public class TMDBService
     {
         try
         {
-            //Console.WriteLine(_http.DefaultRequestHeaders.Authorization);
             var response = await _http.GetAsync(url);
             response.EnsureSuccessStatusCode();
             var movieList = await response.Content.ReadFromJsonAsync<MovieListResponse>(_jsonOptions);
