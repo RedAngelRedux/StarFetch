@@ -1,4 +1,7 @@
-﻿ // The "Video"" way
+﻿export const config = {
+    path: "/TMDB/*"
+}
+
 export default async (request, context) => {
 
     const key = Netlify.env.get("API_KEY");
@@ -21,25 +24,17 @@ export default async (request, context) => {
     console.log("Netlify API Call: ", targetUrl);
     console.log("Auth Header: ", authHeaders(key))
 
-    const response = await fetch(targetUrl, {
-        headers: authHeaders(key)
-    });
+    try {
+        const response = await fetch(targetUrl, {
+            headers: authHeaders(key)
+        });
 
-    console.log("Response status:", response.status);
-    console.log("response:", response);
-
-    return response;
-
-//    return await fetch(targetUrl, {
-//        headers: {
-//            Authorization: `Bearer ${key}`
-//        },
-//        method: request.method
-//    });
-}
-
-export const config = {
-    path:  "/TMDB/*"
+        console.log("Response status:", response.status);
+        return response;
+    } catch (err) {
+        console.error("Fetch failed:", err);
+        return new Response("Upstream API error", { status: 502 });
+    }
 }
 
 function authHeaders(token) {
