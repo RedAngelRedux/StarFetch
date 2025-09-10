@@ -30,6 +30,7 @@ export default async (request, context) => {
         });
 
         console.log("Response status:", response.status);
+        console.log("Response body: ", response.body);
         return response;
     } catch (err) {
         console.error("Fetch failed:", err);
