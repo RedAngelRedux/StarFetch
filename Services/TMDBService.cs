@@ -40,24 +40,32 @@ public class TMDBService
 
     private async Task<MovieListResponse> FetchMoviesAsync(string url)
     {
-        Console.WriteLine(_http.DefaultRequestHeaders.Authorization);
-        var response = await _http.GetAsync(url);
-        response.EnsureSuccessStatusCode();
-        var movieList = await response.Content.ReadFromJsonAsync<MovieListResponse>(_jsonOptions);
-
-        foreach (var movie in movieList?.Results ?? [])
+        try
         {
-            if (!string.IsNullOrEmpty(movie.PosterPath))
-            {
-                movie.PosterPath = $"{_basePosterUrl}{movie.PosterPath}";
-            }
-            else
-            {
-                movie.PosterPath = "img/poster.png";
-            }
-        }
+            //Console.WriteLine(_http.DefaultRequestHeaders.Authorization);
+            var response = await _http.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            var movieList = await response.Content.ReadFromJsonAsync<MovieListResponse>(_jsonOptions);
 
-        return movieList ?? new MovieListResponse();
+            foreach (var movie in movieList?.Results ?? [])
+            {
+                if (!string.IsNullOrEmpty(movie.PosterPath))
+                {
+                    movie.PosterPath = $"{_basePosterUrl}{movie.PosterPath}";
+                }
+                else
+                {
+                    movie.PosterPath = "img/poster.png";
+                }
+            }
+
+            return movieList ?? new MovieListResponse();
+        }
+        catch (Exception ex) 
+        { 
+            Console.WriteLine(ex.Message);
+            return new MovieListResponse();
+        }
     }
 
     public async Task<MovieListResponse> GetNowPlayingMoviesAsync()

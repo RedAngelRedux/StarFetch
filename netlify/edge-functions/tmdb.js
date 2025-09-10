@@ -13,25 +13,28 @@ export default async (request, context) => {
     const tmdbPath = url.pathname.replace("/TMDB/", ""); // /tmdb/movies/popular -> movies/popular
 
 
-    // For Debugging in Production
-    console.log("Incoming request:", request.url);
-    console.log("tmdbUrl:", tmdbUrl);
-    console.log("tmdbPath:", tmdbPath);
-    console.log("Query string:", url.search);
+    //// For Debugging in Production
+    //console.log("Incoming request:", request.url);
+    //console.log("tmdbUrl:", tmdbUrl);
+    //console.log("tmdbPath:", tmdbPath);
+    //console.log("Query string:", url.search);
 
     let targetUrl = tmdbUrl + tmdbPath + url.search
 
-    console.log("Netlify API Call: ", targetUrl);
-    console.log("Auth Header: ", authHeaders(key))
+    //console.log("Netlify API Call: ", targetUrl);
+    //console.log("Auth Header: ", authHeaders(key))
 
     try {
         const response = await fetch(targetUrl, {
             headers: authHeaders(key)
         });
 
-        console.log("Response status:", response.status);
-        console.log("Response body: ", response.body);
-        return response;
+        const body = await response.text();
+        return corsify(body, response.status);
+
+        //console.log("Response status:", response.status);
+        //console.log("Response body: ", response.body);
+        //return response;
     } catch (err) {
         console.error("Fetch failed:", err);
         return new Response("Upstream API error", { status: 502 });
@@ -42,6 +45,18 @@ function authHeaders(token) {
     return {
         Authorization: `Bearer ${token}`
     };
+}
+
+function corsify(body, status = 200) {
+    return new Response(body, {
+        status,
+        headers: {
+            "Content-Type": "application/json",
+            "Access-Control-Allow-Origin": "*",
+            "Access-Control-Allow-Methods": "GET, OPTIONS",
+            "Access-Control-Allow-Headers": "Content-Type, Authorization"
+        }
+    });
 }
 
 //// The "written" way (Did not Build on Netlify As-is)
