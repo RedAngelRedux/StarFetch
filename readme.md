@@ -1,4 +1,5 @@
-﻿# 🎬 StarFetch: Full-Stack Blazor WebAssembly Cinema App  
+﻿# 🎬 StarFetch
+## A Full-Stack Blazor WebAssembly Cinema App  
 *A production-ready movie discovery platform showcasing modern .NET development expertise*
 
 Built with **.NET 8 Blazor WebAssembly**, StarFetch demonstrates my proficiency in creating responsive, interactive single-page applications that rival traditional JavaScript frameworks.
