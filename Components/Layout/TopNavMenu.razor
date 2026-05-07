@@ -41,6 +41,12 @@
                         <span>Favorites</span>
                     </NavLink>
                 </li>
+                <li class="nav-item">
+                    <NavLink class="nav-link" href="/games">
+                        <i class="bi bi-controller" />
+                        <span>Games</span>
+                    </NavLink>
+                </li>
             </ul>
             <form class="d-flex" role="search" @onsubmit="HandleSearch">
                 <InputText class="form-control form-control-sm me-2" type="search" placeholder="Search Movies..." aria-label="Search" name="query" @bind-Value="Query" />

@@ -11,5 +11,6 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<TMDBService>();
 builder.Services.AddScoped<ILocalStorageService, LocalStorageService>();
 builder.Services.AddScoped<FavoritesService>();
+builder.Services.AddScoped<StarFetch.Services.Games.MosaicGameService>();
 
 await builder.Build().RunAsync();

@@ -1,0 +1,451 @@
+@page "/games/mosaic"
+@inject MosaicGameService gameService
+@inject ILocalStorageService localStorage
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<PageTitle>Mosaic Movie Mania</PageTitle>
+
+<div class="container-xxl py-3">
+    <h1 style="color: var(--cf-theme-light)">
+        <i class="bi bi-grid-3x3-gap-fill" style="color: var(--cf-theme-800)" />
+        Mosaic Movie Mania
+    </h1>
+    <p class="lead italic">
+        Guess the movie as the poster is revealed tile by tile!
+    </p>
+
+    @if (isLoading)
+    {
+        <div class="d-flex justify-content-center align-items-center" style="height: 300px;">
+            <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+            </div>
+        </div>
+    }
+    else if (hasError)
+    {
+        <div class="alert alert-danger" role="alert">
+            Failed to load game data. Please try again.
+            <button class="btn btn-sm btn-danger mt-2" @onclick="LoadNewRound">Try Again</button>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            <div class="col-12 mx-auto" style="max-width: 1200px;">
+                <!-- Score Panel -->
+                <div class="card mb-3" style="background-color: rgba(0,0,0,0.6); border: 2px solid rgba(255,255,255,0.2);">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="small" style="color: rgba(255,255,255,0.6);">Round Score</div>
+                                <div class="h4 mb-0 fw-bold" style="color: #ffd700;">@gameState.CurrentRoundScore</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="small" style="color: rgba(255,255,255,0.6);">Total Score</div>
+                                <div class="h4 mb-0 fw-bold" style="color: #00ff88;">@gameState.TotalScore</div>
+                            </div>
+                            <div class="col-4">
+                                <div class="small" style="color: rgba(255,255,255,0.6);">Rank</div>
+                                <div class="h4 mb-0" id="rank-display" style="color: #fff;">@gameState.PlayerRank</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Timer -->
+                <div class="d-flex justify-content-center mb-3">
+                    <div class="badge bg-@(timeRemaining <= 10 ? "danger" : "secondary") fs-5 px-4 py-2">
+                        <i class="bi bi-clock" /> @timeRemaining seconds
+                    </div>
+                </div>
+
+                <!-- Main Game Area: Poster and Answers Side by Side -->
+                <div class="row g-3">
+                    <!-- Left: Mosaic Poster -->
+                    <div class="col-md-6">
+                        <div id="mosaicContainer" class="mosaic-container">
+                            @if (!string.IsNullOrEmpty(currentRound?.PosterUrl))
+                            {
+                                <!-- Base poster image -->
+                                <img src="@currentRound.PosterUrl" 
+                                     alt="Movie poster puzzle" 
+                                     class="mosaic-poster"
+                                     @onload="HandlePosterLoaded"
+                                     @onerror="HandlePosterError" />
+
+                                <!-- Tile overlay grid -->
+                                <div class="mosaic-tiles" id="mosaicTiles" style="grid-template-columns: repeat(@GridSize, 1fr); grid-template-rows: repeat(@GridSize, 1fr);">
+                                    @for (int i = 0; i < GridSize * GridSize; i++)
+                                    {
+                                        var index = i;
+                                        <div class="mosaic-tile" data-tile-index="@index"></div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <div class="text-center text-muted small mt-2">
+                            Tiles revealed: @tilesRevealed / @(GridSize * GridSize)
+                        </div>
+                    </div>
+
+                    <!-- Right: Answer Choices -->
+                    <div class="col-md-6">
+                        @if (!hasAnswered)
+                        {
+                            <div class="d-flex flex-column gap-2">
+                                @foreach (var choice in currentRound?.Choices ?? new List<string>())
+                                {
+                                    <button class="btn btn-outline-light text-start py-3" 
+                                            @onclick="() => HandleAnswer(choice)"
+                                            disabled="@(timeRemaining == 0)">
+                                        @choice
+                                    </button>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="d-flex flex-column gap-2">
+                                @foreach (var choice in currentRound?.Choices ?? new List<string>())
+                                {
+                                    var isCorrect = choice == currentRound?.AnswerMovie?.Title;
+                                    var isSelected = choice == selectedAnswer;
+                                    var btnClass = isCorrect ? "btn-success" : (isSelected ? "btn-danger" : "btn-outline-secondary");
+
+                                    <button class="btn @btnClass text-start py-3" disabled>
+                                        @choice
+                                        @if (isCorrect)
+                                        {
+                                            <i class="bi bi-check-circle-fill float-end" />
+                                        }
+                                        @if (isSelected && !isCorrect)
+                                        {
+                                            <i class="bi bi-x-circle-fill float-end" />
+                                        }
+                                    </button>
+                                }
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <!-- Play Again Button -->
+                @if (hasAnswered)
+                {
+                    <div class="text-center mt-4">
+                        <button class="btn btn-primary btn-lg" @onclick="PlayAgain">
+                            <i class="bi bi-arrow-repeat" /> Play Again
+                        </button>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    private const int GridSize = 10;
+    private const int MaxTimeSeconds = 60;
+    private const int TileRevealIntervalMs = 1500;
+    private const string ScoreStorageKey = "mosaic_game_score";
+
+    private MosaicRoundData? currentRound;
+    private MosaicGameState gameState = new();
+    private bool isLoading = true;
+    private bool hasError = false;
+    private bool hasAnswered = false;
+    private string? selectedAnswer;
+    private int timeRemaining = MaxTimeSeconds;
+    private int tilesRevealed = 0;
+    private List<int> unrevealedTiles = new();
+    private PeriodicTimer? countdownTimer;
+    private PeriodicTimer? tileRevealTimer;
+    private IJSObjectReference? mosaicModule;
+    private IJSObjectReference? effectsModule;
+    private string? previousRank;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            mosaicModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/games/mosaicGame.js");
+            effectsModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/games/winnerEffects.js");
+
+            var savedScore = await localStorage.GetItemAsync<MosaicGameState>(ScoreStorageKey);
+            if (savedScore != null)
+            {
+                gameState.TotalScore = savedScore.TotalScore;
+                gameState.RoundsPlayed = savedScore.RoundsPlayed;
+            }
+            previousRank = gameState.PlayerRank;
+
+            await LoadNewRound();
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Initialization error: {ex.Message}");
+            hasError = true;
+            isLoading = false;
+        }
+    }
+
+    private async Task LoadNewRound()
+    {
+        try
+        {
+            isLoading = true;
+            hasError = false;
+            hasAnswered = false;
+            selectedAnswer = null;
+            timeRemaining = MaxTimeSeconds;
+            tilesRevealed = 0;
+            gameState.CurrentRoundScore = 0;
+
+            currentRound = await gameService.GetNewRoundAsync();
+
+            unrevealedTiles = Enumerable.Range(0, GridSize * GridSize).ToList();
+
+            Console.WriteLine($"Poster URL: {currentRound.PosterUrl}");
+            Console.WriteLine($"Answer Movie: {currentRound.AnswerMovie.Title}");
+
+            // Tiles are now rendered by Blazor, no need for initMosaic JS call
+
+            StartTimers();
+
+            isLoading = false;
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error loading round: {ex.Message}");
+            hasError = true;
+            isLoading = false;
+        }
+    }
+
+    private void StartTimers()
+    {
+        countdownTimer?.Dispose();
+        tileRevealTimer?.Dispose();
+
+        countdownTimer = new PeriodicTimer(TimeSpan.FromSeconds(1));
+        tileRevealTimer = new PeriodicTimer(TimeSpan.FromMilliseconds(TileRevealIntervalMs));
+
+        _ = Task.Run(async () =>
+        {
+            while (await countdownTimer.WaitForNextTickAsync())
+            {
+                if (hasAnswered) break;
+
+                timeRemaining--;
+                await InvokeAsync(StateHasChanged);
+
+                if (timeRemaining <= 0)
+                {
+                    await HandleTimeout();
+                    break;
+                }
+            }
+        });
+
+        _ = Task.Run(async () =>
+        {
+            while (await tileRevealTimer.WaitForNextTickAsync())
+            {
+                if (hasAnswered || unrevealedTiles.Count == 0) break;
+
+                await RevealRandomTiles();
+                await InvokeAsync(StateHasChanged);
+            }
+        });
+    }
+
+    private async Task RevealRandomTiles()
+    {
+        if (mosaicModule == null || unrevealedTiles.Count == 0) return;
+
+        var tilesToReveal = Math.Min(2 + Random.Shared.Next(2), unrevealedTiles.Count);
+
+        for (int i = 0; i < tilesToReveal && unrevealedTiles.Count > 0; i++)
+        {
+            var randomIndex = Random.Shared.Next(unrevealedTiles.Count);
+            var tileIndex = unrevealedTiles[randomIndex];
+            unrevealedTiles.RemoveAt(randomIndex);
+
+            await mosaicModule.InvokeVoidAsync("revealTile", "mosaicContainer", tileIndex, GridSize);
+            tilesRevealed++;
+        }
+    }
+
+    private async Task HandleAnswer(string answer)
+    {
+        if (hasAnswered) return;
+
+        hasAnswered = true;
+        selectedAnswer = answer;
+
+        countdownTimer?.Dispose();
+        tileRevealTimer?.Dispose();
+
+        if (mosaicModule != null)
+        {
+            await mosaicModule.InvokeVoidAsync("revealAll", "mosaicContainer");
+        }
+
+        var isCorrect = answer == currentRound?.AnswerMovie?.Title;
+
+        if (isCorrect)
+        {
+            CalculateScore();
+            gameState.TotalScore += gameState.CurrentRoundScore;
+            gameState.RoundsPlayed++;
+
+            await SaveScore();
+            await PlayWinnerEffect();
+            await CheckRankPromotion();
+        }
+        else
+        {
+            gameState.CurrentRoundScore = 0;
+            gameState.RoundsPlayed++;
+            await SaveScore();
+        }
+
+        StateHasChanged();
+    }
+
+    private async Task HandleTimeout()
+    {
+        if (hasAnswered) return;
+
+        hasAnswered = true;
+
+        countdownTimer?.Dispose();
+        tileRevealTimer?.Dispose();
+
+        if (mosaicModule != null)
+        {
+            await mosaicModule.InvokeVoidAsync("revealAll", "mosaicContainer");
+        }
+
+        gameState.CurrentRoundScore = 0;
+        gameState.RoundsPlayed++;
+        await SaveScore();
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private void CalculateScore()
+    {
+        const int BaseScore = 1000;
+        const int TilePenalty = 15;
+        const int TimePenalty = 10;
+
+        var score = BaseScore;
+        score -= tilesRevealed * TilePenalty;
+        score -= (MaxTimeSeconds - timeRemaining) * TimePenalty;
+
+        gameState.CurrentRoundScore = Math.Max(0, score);
+    }
+
+    private async Task SaveScore()
+    {
+        try
+        {
+            await localStorage.SetItemAsync(ScoreStorageKey, gameState);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error saving score: {ex.Message}");
+        }
+    }
+
+    private async Task PlayWinnerEffect()
+    {
+        if (effectsModule == null) return;
+
+        try
+        {
+            var effectIndex = Random.Shared.Next(7);
+            await effectsModule.InvokeVoidAsync("playWinnerEffect", effectIndex);
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error playing winner effect: {ex.Message}");
+        }
+    }
+
+    private async Task CheckRankPromotion()
+    {
+        var currentRank = gameState.PlayerRank;
+        if (currentRank != previousRank)
+        {
+            await AnimateRankPromotion();
+            previousRank = currentRank;
+        }
+    }
+
+    private async Task AnimateRankPromotion()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("eval", @"
+                const rankEl = document.getElementById('rank-display');
+                if (rankEl) {
+                    rankEl.style.animation = 'rankPromotion 1s ease-in-out';
+                    setTimeout(() => rankEl.style.animation = '', 1000);
+                }
+            ");
+
+            var style = await JS.InvokeAsync<IJSObjectReference>("eval", @"
+                if (!document.getElementById('rank-animation-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'rank-animation-style';
+                    style.textContent = `
+                        @keyframes rankPromotion {
+                            0%, 100% { transform: scale(1); }
+                            50% { transform: scale(1.3); color: gold; }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            ");
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine($"Error animating rank: {ex.Message}");
+        }
+    }
+
+    private async Task PlayAgain()
+    {
+        await LoadNewRound();
+    }
+
+    private void HandlePosterLoaded()
+    {
+        Console.WriteLine("Poster image loaded successfully!");
+    }
+
+    private void HandlePosterError()
+    {
+        Console.Error.WriteLine($"Failed to load poster: {currentRound?.PosterUrl}");
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        countdownTimer?.Dispose();
+        tileRevealTimer?.Dispose();
+
+        if (mosaicModule != null)
+        {
+            await mosaicModule.DisposeAsync();
+        }
+
+        if (effectsModule != null)
+        {
+            await effectsModule.DisposeAsync();
+        }
+    }
+}
